@@ -98,7 +98,7 @@ export const executePostCallAction = async (
     "Follow-up needed",
     "Callback needed",
   ];
-  if (sms_enabled) {
+  if (sms_enabled && sms_from_outcome === parsedContent?.outcome) {
     const smsText = `
 [LEAD AI${
       headerOutcomes.includes(parsedContent?.outcome ?? "")
