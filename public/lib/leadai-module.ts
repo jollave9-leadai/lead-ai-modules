@@ -1,7 +1,7 @@
 // Lead AI Module
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { postCallActionSMSBody, sendSMS } from "./sms-service";
-import { extractPostCallAction } from "./post-call-action";
+import { postCallActionSMSBody, sendSMS } from "./sms-service.ts";
+import { extractPostCallAction } from "./post-call-action.ts";
 
 export function customClient(url: string, key: string) {
   const client = createClient(url, key);
