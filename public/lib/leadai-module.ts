@@ -70,6 +70,7 @@ export const executePostCallAction = async (
     };
 
     const smsBody = postCallActionSMSBody(postCallActionSMSPayload);
+    console.log("vapi.data.phone_number", vapi.data.phone_number);
     const telnyxPayload = {
       from: vapi.data.phone_number,
       messaging_profile_id: "400197bf-b007-4314-9f9f-c5cd0b7b67ae",
@@ -79,6 +80,7 @@ export const executePostCallAction = async (
       use_profile_webhooks: true,
       type: "SMS",
     };
+    console.log("telnyxPayload", telnyxPayload);
     await sendSMS(telnyxPayload, telnyxKey);
   }
 };
