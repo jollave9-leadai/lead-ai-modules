@@ -72,7 +72,8 @@ export const executePostCallAction = async (
     const smsBody = postCallActionSMSBody(postCallActionSMSPayload);
     console.log("vapi.data.phone_number", vapi.data.phone_number);
     const telnyxPayload = {
-      from: vapi.data.phone_number,
+      // from: vapi.data.phone_number,
+      from: "+61489900690",
       messaging_profile_id: "400197bf-b007-4314-9f9f-c5cd0b7b67ae",
       to: phone_number as string,
       text: smsBody,

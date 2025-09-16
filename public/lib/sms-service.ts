@@ -38,8 +38,8 @@ Hi, This is Your AI agent. I received a call from ${
     callerNumber ?? "Unknown number"
   } at ${nowFormattedUTC}.
 
-Summary: ${summary}
-Outcome: ${outcome ?? "Empty outcome"}
+Summary: ${summary}
+Outcome: ${outcome ?? "Empty outcome"}
 
 (Powered by LeadAI)
 `;
