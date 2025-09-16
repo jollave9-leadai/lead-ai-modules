@@ -1,5 +1,7 @@
 // Lead AI Module
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { postCallActionSMSBody, sendSMS } from "./sms-service";
+import { extractPostCallAction } from "./post-call-action";
 
 export function customClient(url: string, key: string) {
   const client = createClient(url, key);
@@ -54,91 +56,29 @@ export const executePostCallAction = async (
     sms_to_caller_enabled,
     sms_to_caller_template,
     sms_to_caller_from_outcome,
-  } = (postCallActionSetup ?? []).reduce(
-    (acc, item) => {
-      switch (item.channel_type) {
-        case "email":
-          return {
-            ...acc,
-            email: item.recipient,
-            email_enabled: item.is_enabled,
-            email_from_outcome: item.type,
-          };
-        case "phone":
-          return {
-            ...acc,
-            phone_number: item.recipient,
-            sms_enabled: item.is_enabled,
-            sms_from_outcome: item.type,
-          };
-        case "is_to_customer":
-          return {
-            ...acc,
-            sms_to_caller_enabled: item.is_enabled,
-            sms_to_caller_template: item.text_content,
-            sms_to_caller_from_outcome: item.type,
-          };
-      }
-      return acc;
-    },
-    {
-      email: "",
-      email_enabled: false,
-      email_from_outcome: "",
-      phone_number: "",
-      sms_enabled: false,
-      sms_from_outcome: "",
-      sms_to_caller_enabled: false,
-      sms_to_caller_template: "",
-      sms_to_caller_from_outcome: "",
-    }
-  );
-  const headerOutcomes = [
-    "Appointment booked",
-    "Follow-up needed",
-    "Callback needed",
-  ];
+  } = extractPostCallAction(postCallActionSetup);
+
   if (sms_enabled && sms_from_outcome === parsedContent?.outcome) {
-    const smsText = `
-[LEAD AI${
-      headerOutcomes.includes(parsedContent?.outcome ?? "")
-        ? " - " + parsedContent?.outcome?.toUpperCase()
-        : ""
-    }]
+    const postCallActionSMSPayload = {
+      summary,
+      outcome: parsedContent.outcome,
+      nowFormattedUTC,
+      transcript,
+      message,
+      telnyxKey,
+      callerNumber,
+    };
 
-Hi, This is Your AI agent. I received a call from ${
-      callerNumber ?? "Unknown number"
-    } at ${nowFormattedUTC}.
-
-Summary: ${summary}
-Outcome: ${parsedContent?.outcome ?? "Empty outcome"}
-
-(Powered by LeadAI)
-`;
-    const to = phone_number;
+    const smsBody = postCallActionSMSBody(postCallActionSMSPayload);
     const telnyxPayload = {
-      from: "+61489900690",
+      from: vapi.data.phone_number,
       messaging_profile_id: "400197bf-b007-4314-9f9f-c5cd0b7b67ae",
-      to: to,
-      text: smsText,
+      to: phone_number as string,
+      text: smsBody,
       subject: "From LeadAI!",
       use_profile_webhooks: true,
       type: "SMS",
     };
-    console.log(telnyxPayload);
-    try {
-      const smsResponse = await fetch("https://api.telnyx.com/v2/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${telnyxKey}`,
-        },
-        body: JSON.stringify(telnyxPayload),
-      });
-      const smsText = await smsResponse.text();
-      console.log("Telnyx SMS response:", smsText);
-    } catch (smsError) {
-      console.error("Failed to send Telnyx SMS:", smsError);
-    }
+    await sendSMS(telnyxPayload, telnyxKey);
   }
 };
