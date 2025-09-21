@@ -78,7 +78,8 @@ export const executePostCallAction = async (
   if (
     sms_enabled &&
     // if outcome is null means it is from inbound agent config so notify regardless the outcome
-    (sms_from_outcome === null || sms_from_outcome === parsedContent?.outcome)
+    (sms_from_outcome === null ||
+      (sms_from_outcome as string)?.split(",").includes(parsedContent?.outcome))
   ) {
     const smsPayload = {
       summary,
@@ -107,7 +108,9 @@ export const executePostCallAction = async (
     sms_to_caller_enabled &&
     // if outcome is null means it is from inbound agent config so notify regardless the outcome
     (sms_to_caller_from_outcome === null ||
-      sms_to_caller_from_outcome === parsedContent?.outcome)
+      (sms_to_caller_from_outcome as string)
+        ?.split(",")
+        .includes(parsedContent?.outcome))
   ) {
     const smsBodyToCallerPayload = {
       agentName: agent.name,
