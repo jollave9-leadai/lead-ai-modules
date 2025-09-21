@@ -1,9 +1,10 @@
+import { smsToCustomerDefaultTemplate } from "./constant.ts";
+
 export const sendSMS = async (
   telnyxPayload: Record<string, unknown>,
   telnyxKey: string
 ) => {
   try {
-
     // using fetch instead of axios since using it in supabase edge functions requires esm modules
     const smsResponse = await fetch("https://api.telnyx.com/v2/messages", {
       method: "POST",
@@ -44,4 +45,13 @@ Outcome: ${outcome ?? "Empty outcome"}
 (Powered by LeadAI)
 `;
   return smsText;
+};
+
+export const postCallActionSMSBodyToCaller = (
+  payload: Record<string, unknown>
+) => {
+  const { sms_to_caller_template, agentName, callerName } = payload;
+
+  const smsText = sms_to_caller_template ? sms_to_caller_template : smsToCustomerDefaultTemplate;
+  return (smsText as string).replace(/\{caller_name\}/g, (callerName as string) ?? "").replace(/\{agent_name\}/g, (agentName as string) ?? "AI agent");
 };
